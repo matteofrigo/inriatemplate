@@ -1,0 +1,488 @@
+%  Beamer slide example 
+%
+%%%
+% Changelog
+% - 2011-09-26 : v0.1 : import from a presentation + suppress some stuff
+%%
+\documentclass[slideopt,A4]{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage{pgf}
+\usepackage{fancyhdr}
+\usepackage{multirow}
+\usepackage{listings}
+\usepackage{inria}
+\input{beamerinnerthemeinria.sty}
+
+\newcommand{\EMETTEUR}{Yohan Lee-tin-yien\ }
+\newcommand{\talktitle}{ADT ParScaLi : Final report}
+\newcommand{\talkdate}{September 13, 2011\ }
+\newcommand{\inriafoot}{\EMETTEUR - \talktitle}
+
+
+\begin{document}
+
+\input{inria-atbeginsection.tex}
+
+
+
+%   \setbeamertemplate{background canvas}[vertical shading][top=rouge1,bottom=rouge1,middle=rouge1]
+%   \setbeamercolor{toto}{fg=blanc,bg=rouge1}
+%   \setbeamertemplate{footline}
+% {
+% \begin{beamercolorbox}[wd=1\paperwidth,ht=15.5pt]{toto}
+% \hspace{3mm}	\includegraphics[width=18mm]{logobasrouge1}
+%   \hspace{1.5cm}  
+%   \raisebox{2.5ex}
+%   {EMETTEUR - NOM DE LA PRESENTATION}\hfill 
+%   \raisebox{2.5ex}
+%   {\today - \insertframenumber \hspace{5mm} \null }
+% \end{beamercolorbox}}
+
+% \begin{frame}
+%
+% \begin{textblock*}{10cm}(20mm,10mm)
+% \textcolor{white}{\large INTRODUCTION}
+% \end{textblock*}
+%
+% \begin{textblock*}{10cm}(20mm,20mm)
+%
+% 	Your text with scientific results or what ever... Your text with
+% scientific results or what ever... Your text with scientific results or
+% what ever... Your text with scientific results or what ever... Your
+% text with scientific results or what ever... Your text with scientific
+% results or what ever... Your text with scientific results or what
+% ever... Your text with scientific results or what ever... Your text
+% with scientific results or what ever...
+%
+% Your text with scientific results or what ever... Your text with
+% scientific results or what ever... Your text with scientific results or
+% what ever... Your text with scientific results or what ever... Your
+% text with scientific results or what ever... Your text with scientific
+% results or what ever... Your text with scientific results or what
+% ever...
+% \end{textblock*}
+% \end{frame}
+
+
+
+
+
+
+%%%%%%%%%%% Title page 
+
+\setbeamertemplate{background canvas}[vertical shading][top=rouge1,middle=rouge1,bottom=rouge1]
+\setbeamertemplate{footline}{\hspace{5em} \textcolor{white} {\null \hfill\talkdate}\hspace{2em}\null \vspace*{3pt}}
+
+\begin{frame}
+
+\begin{textblock*}{40mm}[0,0](10mm,0mm)
+ \includegraphics[width=4cm]{logos/inria/logorouge1}
+  \end{textblock*}
+
+\begin{textblock*}{7cm}(13mm,50mm)
+{\textcolor{white} {
+{\huge ADT ParScaLi: }\\[2mm]
+   { \huge Final report}\\[3mm]
+   	{Parallel Scalable Hybrid Library for Large Scale Simulations} [Yohan Lee-tin-yien] }
+	}
+	\end{textblock*}
+
+
+   \begin{textblock*}{40mm}[0,0](10mm,76mm)
+  \begin{picture}(5,80)
+\put(0,23){\includegraphics[width=4cm,height=1.5cm]{logos/inria/logobasrougeV1}}
+\put(20,50){\tiny \textcolor{rouge2}{EQUIPE-PROJET}}
+\put(20,43){\tiny \textcolor{rouge2}{HiePACS}}
+\put(20,34){\tiny \textcolor{rouge2}{Centre Emetteur}}
+\put(20,27){\tiny \textcolor{rouge2}{Bordeaux Sud-Ouest}}
+\end{picture}
+\end{textblock*}
+
+\vspace*{-4pt}
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setbeamertemplate{background canvas}[vertical shading][top=blanc, middle=blanc,bottom=blanc]
+\setbeamertemplate{footline}
+{
+\begin{beamercolorbox}[wd=1\paperwidth,ht=15.5pt]{toto}
+\hspace{3mm}	
+\includegraphics[width=17mm]{logos/inria/logobastrans}
+  \hspace{1.5cm}  
+  \raisebox{2.5ex}
+  {\inriafoot}\hfill 
+  \raisebox{2.5ex}
+  {\talkdate - \insertframenumber \hspace{5mm} \null }
+\end{beamercolorbox}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+  \frametitle{\bfseries Outline}
+  \tableofcontents[hideallsubsections]
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\setbeamercolor{toto}{fg=blanc,bg=rouge1}
+
+%%
+\section{Introduction}
+%%
+\subsection{Motivations}
+\frame{\frametitle{Motivations} 
+\centerline{Goal: solving ${\cal A}x =b$, where ${\cal A}$ is sparse}
+}
+\subsection{Hybrid method}
+%%
+%%
+\begin{frame}{Hybrid method}{Step by step}
+\begin{minipage}{0.5 \textwidth}
+  \begin{enumerate}
+  \item \only<1>{Partition the initial system}
+  \item \only<2>{Factorize the local system And
+    Get the Schur complement}
+  \item \only<3>{Compute the preconditioner}
+  \item \only<4>{Solve the system}
+  \end{enumerate}
+\end{minipage}
+\hskip 0.63cm
+\begin{minipage}{0.40\textwidth}
+    \only<1>{
+      \centerline{Use: a partitioner}
+      \centerline{\alert{METIS} or \alert{SCOTCH}}
+      {\small
+	   $$ {\cal A}^{(i)} \equiv
+	  \begin{pmatrix}
+	      {\cal A}_{{\cal I}_i{\cal I}_i} 		& {\cal A}_{{\cal I}_i\Gamma_i}	 		 \cr
+	      {\cal A}_{{\cal I}_i\Gamma_i} 		& {\cal A}_{\Gamma\Gamma}^{({i})}	 		 \cr
+	  \end{pmatrix}
+           $$
+	   }
+
+      }
+    \only<2>{
+      \centerline{Use: a sparse direct solver}
+      \centerline{\alert{MUMPS} or \alert{PaSTiX}}
+      $$
+      \alert{{\cal S}^{({i})} = {\cal A}_{\Gamma\Gamma}^{({i})} - 
+        {\cal A}_{\Gamma_{i} {\cal I}_{i}} {\cal A}_{{\cal I}_{i}{\cal I}_{i}}^{-1} {\cal A}_{{\cal I}_{i} \Gamma_{i}}}
+      $$
+      \small{Focus on the Schur system:}
+      ${\cal S} x_{\Gamma} =f$
+      }
+    \only<3>{
+      \begin{enumerate}
+      \item Copy \& assemble 
+        $$\alert{{\cal S}^{({i})}}$$
+    \item Factorize it or its approx.
+      (\alert{LAPACK}, \alert{MUMPS} or \alert{PaSTiX})
+    \end{enumerate}
+    }
+    \only<4>{
+      \begin{enumerate}
+      \item Compute the second members
+      \item Solve iteratively (\alert{GMRES/CG})
+        ${\cal S} x_{\Gamma} = f$
+      \item Solve lc. system (\alert{MUMPS} or \alert{PaSTiX})
+        $${\cal A}_{{\cal I}_i{\cal I}_i}x_{{\cal I}_i} = b_{{\cal I}_i} - {\cal A}_{{\cal I}_i\Gamma_i}x_{\Gamma_{i}}$$
+      \item Gather the solution
+      \end{enumerate}
+    }
+\end{minipage}
+\end{frame}
+
+%
+\subsection{ADT}
+\begin{frame}{ADT}{Context}
+\begin{itemize}
+\item Main idea: mix the iterative and direct concepts 
+$\Rightarrow$ Hybrid method
+
+\item PHD + postdoctoral (4.5 years): Prototype Solver called MaPHyS
+\item MaPHyS: Massively Parallel Hybrid Solver
+\end{itemize}
+\end{frame}
+
+\begin{frame}{ADT}{Objectives}
+
+MaPHyS - prototype $\rightarrow$ stable library 
+
+\begin{itemize}
+\item<1-> Improve code (conform to standards, add structures !)
+\item<2-> Add genericity ($3^{rd}$ party softwares)
+\item<3-> Validate + improvement performances
+\item<4-> Write user and dev guide
+\end{itemize}
+
+\end{frame}
+
+%
+\subsection{Team}
+\begin{frame}{Team}
+
+HiePACS:
+  \begin{itemize}
+  \item Jean Roman
+  \item Luc Giraud
+  \item Emmanuel Agullo
+  \item Abdou Guermouche
+  \item Yohan Lee-tin-yien
+  \end{itemize}
+\pause
+People:
+  \begin{itemize}
+  \item Hervé Mathieu (SED)
+  \item Azzam Haidar (UTK)
+  \end{itemize}
+\end{frame}
+
+%
+\subsection{Organization}
+\begin{frame}{Organization}
+\begin{itemize}
+\item Weekly "what was done" [wiki]
+\item Weekly "what is expected" [wiki]
+\item Weekly phone meetings
+\pause
+\item Monthly IJD meetings w/ Hervé Mathieu (SED)
+\pause
+\item Punctuals meetings 
+  \begin{itemize}
+  \item Luc Giraud's passage
+  \item Missions to Toulouse CERFACS (technical talks) with Luc Giraud or Azzam Haidar
+  \item Quarterly meetings
+  \end{itemize}
+\pause
+\item Links
+  \begin{itemize}
+  \item Wiki [internal]: https://wiki.bordeaux.inria.fr/maphys/doku.php
+  \item Gforge [private]: https://gforge.inria.fr/projects/maphys/
+  \item Doxygen docs [internal]: http://maphys.bordeaux.inria.fr/
+  \end{itemize}
+\end{itemize}
+
+
+\end{frame}
+
+%
+\section{MaPHyS' source code}
+\subsection{Prototype's source code}
+\begin{frame}{Prototype's source code}
+\begin{minipage}{0.42 \textwidth}
+\begin{itemize}
+  \item No structures
+  \item Hence, lack of genericity
+  \item Old coding style (FORTRAN 77)
+  \item No user guide, few comments
+  \item Initial API, use of shared variable 
+\end{itemize}
+\only<2->{\alert{$\Rightarrow$ Rewrite the code}}
+\end{minipage}
+\end{frame}
+%
+\subsection{Rewritten source code}
+\begin{frame}{Rewritten source code}
+\begin{minipage}{0.60 \textwidth}
+\begin{itemize}
+  \item Use structures
+  \item Genericity added 
+  \item Follow F90 coding style recommendations
+  \item Add user guide and a lot of comments
+  \item Better multi-arithmetic handling
+  \item New API, one structure based. Similar to well-known F90 solvers (Harwell Boeing, MUMPS).
+\end{itemize}
+\end{minipage}
+\end{frame}
+%
+
+%
+\subsection{Compilation}
+\begin{frame}{Compilation}
+  Requested Features \& issues:
+  \begin{itemize}
+  \item Portable, standard
+  \item Support of multi-arithmetic
+  \item Future support of mixed arithmetic % $\Rightarrow$ CPP not enough
+    (single/double precisions)
+  \end{itemize}
+  
+  Solution:
+  \begin{itemize}
+  \item GNU/Make 
+  \item Use a custom script
+  \end{itemize}
+
+  % Example: 
+  % \only<2->{
+  % \only<2>{{\bf x}mph\_maphys\_mod.}\only<3->{{\bf c}mph\_maphys\_mod.}\only<2-3>{\bf F90}\only<4>{\bf f90}\only<5>{\bf o}  \only<1>{(generic)}
+  % \only<3>{\bf [script]}
+  % \only<4>{\bf [cpp]}
+  % \only<5>{\bf [Fortran 90 compiler]}
+  % }
+\end{frame}
+%
+\subsection{New features}
+\begin{frame}{New features}
+   \begin{itemize}
+     \item Enabling "MPI + Threads" with multithreaded {\bf PaSTiX}
+          \begin{itemize}
+           \item Use MPI between domains
+           \item Use Threads inside domain 
+          \end{itemize}
+     \item Support of Symmetric/SPD systems.
+       \begin{itemize}
+       \item Use dedicated sparse direct solver options
+       \item Use dedicated LAPACK routines
+       \item Use {\bf PackCG} (Conjugate Gradient)
+       \end{itemize}
+     \item Genericity in partitioning
+       \begin{itemize}
+       \item Interface {\bf SCOTCH} software 
+       \item Plug a distributed generator (distributed inputs)
+       \end{itemize}
+     \item Statistics (performances, memory usages) 
+   \end{itemize}
+\end{frame}
+%%
+%%
+%
+\subsection{New API}
+%%
+\section{MaPHyS' validations}
+\subsection{Overview of validations}
+\begin{frame}{Overview of validations}
+   \begin{itemize}
+     \item Abstraction or components \only<2->{{: \bf unit tests}} \only<5->{{, \bf every commit }}
+     \item Functionality or strategy \only<3->{{: \bf elemental cases}} \only<6->{{, \bf every feature }}
+     \item Performances \only<4->{: \bf average cases} \only<7->{{, \bf every benchmark }}
+   \end{itemize}
+\end{frame}
+
+\subsection{Example: description}
+\frame{\frametitle{Example: description}
+\only<1>{
+  \begin{block}{{\sc Audi - PARASOL}}
+    \begin{itemize}
+    \item {3D structural mechanics problem}
+    \item {943,695 dof}
+    \item {39,297,771 nnz}  
+    \end{itemize}
+  \end{block}
+}
+\only<2>{
+    \begin{textblock*}{\textwidth}(22mm,15mm)
+      { \tiny
+      \begin{block}{{\sc Loulou}}
+        \begin{itemize}
+        \item 1 node \phantom{()}
+        \item Dual-socket hexa-core CPU
+        \item Intel Nehalem \\ X5670 @ 2.93 GHz
+        \item RAM: 96 GB 
+        \item Ethernet \\@ 1 Gb/s
+        \end{itemize}
+      \end{block}
+      
+      \begin{block}{{\sc Fourmi}}
+        \begin{itemize}
+        \item 68 nodes (up to 16)
+        \item Dual-socket quad-core CPUs
+        \item Intel Nehalem \\ X5550 @ 2.66 GHz
+        \item RAM: 24 GB/node
+        \item Infiniband QDR \\ @ 40 Gb/s
+     \end{itemize}
+  \end{block}
+}
+\end{textblock*}
+}
+}
+
+\subsection{Example: performances}
+\begin{frame}{Example: performances}
+\centerline{\bf Issue: Schur assembly is slow}
+\centerline{\bf Origin: MPI\_Bsend performances are variables.}
+\centerline{\bf Solution: use MPI\_Isend instead}
+\end{frame}
+%%
+%%
+\begin{frame}{Workshops \& conferences}
+\subsection{Workshops \& conferences}
+ Parallelism specific:
+ \begin{itemize}
+   \item NCSA-INRIA 2010 [Bordeaux, 2010]
+   \item EUROPAR 2011 [Bordeaux, 2011]
+ \end{itemize}
+
+ Math specific:
+ \begin{itemize}
+   \item SPARSE DAYS 2010 [Toulouse, 2010]
+   \item PRECOND 2011 [Bordeaux, 2011]
+ \end{itemize}
+\end{frame}
+
+\begin{frame}{Trainings \& acquired skills }
+\subsection{Trainings \& acquired skills }
+ Trainings:
+ \begin{itemize}
+   \item Software Project Management training
+   \item GPGPU training
+   \item Technical trainings by Bordeaux' SED
+ \end{itemize}
+
+ Skills:
+ \begin{itemize}
+   \item Tools: CMake, Autotools, Buildbot
+   \item Languages: Python, Perl, Fortran 90
+   \item Standards: Fortran 90 \& Compilation standards
+ \end{itemize}
+\end{frame}
+
+
+%%
+\section{Conclusion}
+\begin{frame}{Conclusion}
+For Maphys:
+\begin{itemize}
+  \item Improved code quality
+  \item Currently under performances validations
+  % \item 3 months of a future PhD student
+  % \item Future PhD on MaPHyS 2.0 planned...
+  \item Solid platform for future research (GPUs, ...)  
+\end{itemize}
+
+\only<2->{
+For me: 
+\begin{itemize}
+  \item Great experience (Workshops,Confs,Skills)
+  % \item Future ? \only<3->{ Find a new job}
+\end{itemize}
+}
+\end{frame}
+%
+%
+\setbeamertemplate{background canvas}[vertical shading][top=rouge1,middle=rouge1,bottom=rouge1]
+\setbeamertemplate{footline}{}
+\begin{frame}
+\begin{center} 
+\textcolor{white} {\huge Questions ?}
+\end{center}
+
+\begin{textblock*}{7cm}(60mm,76mm)
+{\textcolor{white} {
+{Bordeaux}\\[1mm]
+   {INRIA Bordeaux Sud-Ouest}\\[2mm]
+   	{www.inria.fr}}
+	}
+	\end{textblock*}
+
+   \begin{textblock*}{40mm}[0,0](10mm,76mm)
+  \begin{picture}(5,80)
+\put(0,23){\includegraphics[width=4cm]{logos/inria/logobasrouge1}}
+
+\end{picture}
+\end{textblock*}
+
+\vspace*{-4pt}
+\end{frame}
+
+
+\end{document}
+
+
